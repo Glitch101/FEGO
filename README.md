@@ -1,6 +1,6 @@
 # FEGO
 ## What is it
-FEGO for ***Feel Good** is a gadget powered by **Spotify** that allows you to control your music by buttons. It uses Spotify's API to do a lot of things. Some are basic and others are cool.<br>
+FEGO for **Feel Good** is a gadget powered by **Spotify** that allows you to control your music by buttons. It uses Spotify's API to do a lot of things. Some are basic and others are cool.<br>
 **You don't need to open Spotify to do any of the things written below.**
 ### Features
 <details><summary>What can FEGO do?</summary>
