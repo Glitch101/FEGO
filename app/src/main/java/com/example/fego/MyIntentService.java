@@ -65,7 +65,7 @@ public class MyIntentService extends IntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "1")
                 .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("FEGO")
+                .setContentTitle("FEGO Client")
                 .setContentText("Much longer text that cannot fit one line...")
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText("Much longer text that cannot fit one line..."))

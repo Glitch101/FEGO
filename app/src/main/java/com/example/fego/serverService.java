@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.types.Track;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -22,6 +23,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import static com.example.fego.MainActivity.mSpotifyAppRemote;
+import static com.example.fego.MainActivity.playlist_1_uri;
+import static com.example.fego.MainActivity.playlist_2_uri;
 
 
 public class serverService extends IntentService {
@@ -29,6 +32,7 @@ public class serverService extends IntentService {
 
     public static int b = 0;
     public static Socket s;
+    private String curr_uri = null;
 
 
 
@@ -99,16 +103,42 @@ public class serverService extends IntentService {
             mSpotifyAppRemote.getPlayerApi().pause();
 
         } else if(b == 3) {
-            // Play playlist 1
+            // Next song
             Log.i("TAG", "in b  == 3");
-            mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY"); // Playlist number 1
+            mSpotifyAppRemote.getPlayerApi().skipNext();
+            //mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY"); // Playlist number 1
 
 
         } else if(b == 4) {
-            // Play playlist 2
+            // Previous song
             Log.i("TAG", "in b  == 4");
-            mSpotifyAppRemote.getPlayerApi().play("spotify:album:5Gf5m9M6RiK2lkjpbP0xRu"); // Playlist number 2
+            mSpotifyAppRemote.getPlayerApi().skipPrevious();
+            //mSpotifyAppRemote.getPlayerApi().play("spotify:album:5Gf5m9M6RiK2lkjpbP0xRu"); // Playlist number 2
 
+
+        } else if(b == 5) {
+            //Repeat current song
+            mSpotifyAppRemote.getPlayerApi().setRepeat(1);
+        } else if(b == 6) {
+            // Play playlist number 1
+            mSpotifyAppRemote.getPlayerApi().play(playlist_1_uri);
+
+        } else if(b == 7) {
+            // Play playlist number 2
+            mSpotifyAppRemote.getPlayerApi().play(playlist_2_uri);
+
+        } else if(b == 8) {
+            // Add current song to user's Spotify library
+            //TODO: Get current tracks uri
+            currentSongUri();
+            mSpotifyAppRemote.getUserApi().addToLibrary(curr_uri);
+
+        } else if(b == 9) {
+            // Get current tracks uri and add it to the list of blacklisted songs.
+            // Whenever a blacklisted uri is detected, that track is skipped!
+            currentSongUri();
+            // TODO: Now add the uri saved in curr_uri to blacklist
+            // TODO: Also make sure fego_background always checks the uri of a song before playing so that any blacklisted song is not played
 
         }
 
@@ -116,6 +146,16 @@ public class serverService extends IntentService {
         // Subscribe to PlayerState
         //mSpotifyAppRemote.getPlayerApi().subscribeToPlayerState().setEventCallback(playerState -> {final Track track = playerState.track;if(track!=null) {Log.d("MainActivity", track.name + " by " + track.artist.name);}});
     }
+
+    private void currentSongUri() {
+        mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
+            final Track track = playerState.track;
+            if(track != null) {
+                curr_uri = track.uri;
+            }
+        });
+    }
+
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -137,7 +177,7 @@ public class serverService extends IntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "2")
                 .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("FEGO")
+                .setContentTitle("fego_background")
                 .setContentText("Connected to Server")
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText("Connected"))
@@ -164,7 +204,7 @@ public class serverService extends IntentService {
                     a = inFromServer.read();
                     b = Character.getNumericValue(a);
                     Log.i("TAG", "Got code. Code is : " + b);
-                    if(b == 1 | b == 2 | b == 3 | b == 4) {
+                    if(b == 1 | b == 2 | b == 3 | b == 4 | b ==5 | b == 6 | b == 7 | b == 8 | b == 8 | b == 9) {
                         Log.i("TAG", "calling connected()");
                         connected();
                     }

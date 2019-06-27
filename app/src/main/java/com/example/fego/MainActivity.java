@@ -1,18 +1,25 @@
 package com.example.fego;
 
-import android.app.IntentService;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
-import android.os.Build;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -21,14 +28,110 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 
 public class MainActivity extends AppCompatActivity {
+
+
+    private UriViewModel mUriViewModel;
+
     private static final String  CLIENT_ID = "20f03825e6834755b19fd4e18d0c8faf";
     private static final String REDIRECT_URI = "https://fego.com/callback/";
     public static SpotifyAppRemote mSpotifyAppRemote;
+    EditText mplayList1;
+    EditText mplayList2;
+    EditText mblacklist;
+    Button save1;
+    Button save2;
+    public static String playlist_1_uri = "spotify:user:spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY";
+    public static String playlist_2_uri = "spotify:album:5Gf5m9M6RiK2lkjpbP0xRu";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mUriViewModel = ViewModelProviders.of(this).get(UriViewModel.class);
+
+    }
+
+    public void loadData() {
+        //get playlists uri
+        SharedPreferences prefs= this.getSharedPreferences("playlist_uri" , MainActivity.MODE_PRIVATE);
+        // Playlist 1
+        playlist_1_uri = prefs.getString("uri1",playlist_1_uri);
+        // Playlist 2
+        playlist_2_uri = prefs.getString("uri2",playlist_2_uri);
+    }
+
+    public void saveData() {
+        // Save both playlists uri
+        SharedPreferences prefs = this.getSharedPreferences("playlist_uri" , MainActivity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("uri1" , playlist_1_uri);
+        editor.putString("uri2", playlist_2_uri);
+        editor.apply();
+    }
+
+    public void add(View view) {
+        // First check if the uri is already in database
+      /* if(mUriViewModel.search(uri) == true) {
+           Toast.makeText(this, "URI already  in list", Toast.LENGTH_LONG);
+       }*/
+      /* else {
+           mUriViewModel.insert(uri);
+       }*/
+      mblacklist = findViewById(R.id.blacklist_textview);
+       if(!mblacklist.getText().toString().equals("")) {
+            /*Uri uri = new Uri(mblacklist.getText().toString());
+            UriRepository rp = new UriRepository(getApplication());
+            rp.insert(uri);*/
+            Uri uri = new Uri(mblacklist.getText().toString());
+            mUriViewModel.search(uri);
+        } else {
+           Log.i("TAGG", " in else");
+            Toast.makeText(MainActivity.this, "Please paste URI first", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void remove(View view) {
+        // Remove a given URI from blacklist
+        // First search the database if the song exists in list
+        // Then show a toast according to situation
+    }
+
+    public void  updatePlaylistUri(View v) {
+
+        mplayList1 = (EditText)findViewById(R.id.playlist1_textview);
+        mplayList2 = (EditText)findViewById(R.id.playlist2_textview);
+        // Determine which button was pressed and then accordingly update
+        // that playlist's URI
+
+        // Determine which button was pressed
+        int id = v.getId();
+        switch(id) {
+            case R.id.playlist1_button:
+                if(!mplayList1.getText().toString().equals("")) {
+                    playlist_1_uri = mplayList1.getText().toString();
+                    Toast.makeText(this, "Playlist 1 updated", Toast.LENGTH_LONG).show();
+                }
+                copyToClipboard(playlist_1_uri);
+                break;
+
+            case R.id.playlist2_button:
+                if(!mplayList2.getText().toString().equals("")) {
+                    playlist_2_uri = mplayList2.getText().toString();
+                    Toast.makeText(this, "Playlist 2 updated", Toast.LENGTH_LONG).show();
+                }
+                copyToClipboard(playlist_2_uri);
+                break;
+        }
+
+    }
+
+
+    public void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("clip_uri", text);
+        clipboard.setPrimaryClip(clip);
     }
 
 
@@ -86,13 +189,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        //Log.i("TAG", "App Paused");
+        saveData();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //Log.i("TAG", "App resumed");
+        loadData();
     }
 
 }
