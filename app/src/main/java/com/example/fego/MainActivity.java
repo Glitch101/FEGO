@@ -71,20 +71,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void add(View view) {
-        // First check if the uri is already in database
-      /* if(mUriViewModel.search(uri) == true) {
-           Toast.makeText(this, "URI already  in list", Toast.LENGTH_LONG);
-       }*/
-      /* else {
-           mUriViewModel.insert(uri);
-       }*/
+        Boolean z;
       mblacklist = findViewById(R.id.blacklist_textview);
        if(!mblacklist.getText().toString().equals("")) {
-            /*Uri uri = new Uri(mblacklist.getText().toString());
-            UriRepository rp = new UriRepository(getApplication());
-            rp.insert(uri);*/
             Uri uri = new Uri(mblacklist.getText().toString());
-            mUriViewModel.search(uri);
+           z = mUriViewModel.insert(uri);
+           if(z == false) {
+               Toast.makeText(this, "URI already in blacklist", Toast.LENGTH_LONG).show();
+           } else Toast.makeText(this, "Added to blacklist", Toast.LENGTH_LONG).show();
         } else {
            Log.i("TAGG", " in else");
             Toast.makeText(MainActivity.this, "Please paste URI first", Toast.LENGTH_SHORT).show();
@@ -93,9 +87,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void remove(View view) {
-        // Remove a given URI from blacklist
-        // First search the database if the song exists in list
-        // Then show a toast according to situation
+        Boolean z;
+        mblacklist = findViewById(R.id.blacklist_textview);
+        if(!mblacklist.getText().toString().equals("")) {
+            Uri uri = new Uri(mblacklist.getText().toString());
+            z = mUriViewModel.delete(uri);
+            if(z == false) {
+                Toast.makeText(this, "URI not found", Toast.LENGTH_LONG).show();
+            } else Toast.makeText(this, "Deleted successfully", Toast.LENGTH_LONG).show();
+        } else {
+            Log.i("TAGG", " in else");
+            Toast.makeText(MainActivity.this, "Please paste URI first", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     public void  updatePlaylistUri(View v) {

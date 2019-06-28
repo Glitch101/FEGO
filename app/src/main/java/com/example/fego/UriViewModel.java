@@ -8,8 +8,10 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+
 public class UriViewModel extends AndroidViewModel {
     private UriRepository mRepository;
+    public static long i = -11;
 
     private LiveData<List<Uri>> mAllUri;
 
@@ -21,15 +23,19 @@ public class UriViewModel extends AndroidViewModel {
 
     LiveData<List<Uri>> getAllUri() { return mAllUri; }
 
-    public void insert (Uri uri) { mRepository.insert(uri); }
+    public Boolean insert (Uri uri) {
+        i = mRepository.insert(uri);
+        Log.i("TAGG", "i received is : " + i);
+        if(i == -1) {
+            return false;
+        } else return true;
+    }
 
-    public void search (Uri uri) {
-        Log.i("TAGG", " in search:UriViewModel");
-        mRepository.search(uri);
-     /*   if(mRepository.search(uri) == true) {
-            return true;
-        } else return false;*/
-
+    public Boolean delete (Uri uri) {
+        i = mRepository.delete(uri);
+        if(i == 0) {
+            return false;
+        } else return true;
     }
 
 }
