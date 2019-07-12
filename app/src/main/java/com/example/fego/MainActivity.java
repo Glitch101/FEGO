@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private UriViewModel mUriViewModel;
 
-    private static final String  CLIENT_ID = "20f03825e6834755b19fd4e18d0c8faf";
-    private static final String REDIRECT_URI = "https://fego.com/callback/";
+    private static final String  CLIENT_ID = ""; // your client id
+    private static final String REDIRECT_URI = ""; // your redirect uri
     public static SpotifyAppRemote mSpotifyAppRemote;
     EditText mplayList1;
     EditText mplayList2;
